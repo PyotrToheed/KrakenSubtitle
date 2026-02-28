@@ -10,11 +10,11 @@ Give it a video — get it back with karaoke-style subtitles where each word hig
 
 ### Input (original video)
 
-https://github.com/user-attachments/assets/demo_input.mp4
+https://github.com/user-attachments/assets/ba2e2442-9bb0-4973-9f8b-221cb4dd5963
 
 ### Output (with KrakenSubtitle)
 
-https://github.com/user-attachments/assets/demo_output.mp4
+https://github.com/user-attachments/assets/4c35e84a-2333-4c18-be1e-15e7b9a09345
 
 > Demo clip from [TED Talk by Daniel Levitin](https://www.ted.com/talks/daniel_levitin_how_to_stay_calm_when_you_know_you_ll_be_stressed). Subtitles generated with `--engine whisper` (local, free).
 
