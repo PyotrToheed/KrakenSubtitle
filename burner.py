@@ -4,8 +4,10 @@ FFmpeg subtitle burner — overlays ASS subtitles onto video.
 
 import os
 import json
+import shutil
 import subprocess
 import sys
+import tempfile
 
 
 def get_video_info(video_path: str) -> dict:
@@ -50,9 +52,18 @@ def burn(video_path: str, ass_path: str, output_path: str, crf: int = 18) -> boo
     """
     Burn ASS subtitles onto video using FFmpeg.
 
+    Copies the ASS file to a safe temp path (no special characters) to avoid
+    FFmpeg subtitle filter path issues with apostrophes, spaces, etc.
+
     Returns True on success, False on failure.
     """
-    sub_escaped = escape_ass_path(ass_path)
+    # Copy ASS to a safe temp path — avoids apostrophes/special chars in filename
+    # breaking FFmpeg's subtitles='...' filter
+    safe_dir = tempfile.mkdtemp(prefix="kraken_burn_")
+    safe_ass = os.path.join(safe_dir, "subs.ass")
+    shutil.copy2(ass_path, safe_ass)
+
+    sub_escaped = escape_ass_path(safe_ass)
 
     cmd = [
         "ffmpeg", "-y",
@@ -90,3 +101,6 @@ def burn(video_path: str, ass_path: str, output_path: str, crf: int = 18) -> boo
     except Exception as e:
         print(f"  FFmpeg failed: {e}", file=sys.stderr)
         return False
+    finally:
+        # Cleanup safe temp copy
+        shutil.rmtree(safe_dir, ignore_errors=True)

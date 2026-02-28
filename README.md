@@ -6,6 +6,20 @@ Give it a video — get it back with karaoke-style subtitles where each word hig
 
 ---
 
+## Demo
+
+### Input (original video)
+
+https://github.com/user-attachments/assets/demo_input.mp4
+
+### Output (with KrakenSubtitle)
+
+https://github.com/user-attachments/assets/demo_output.mp4
+
+> Demo clip from [TED Talk by Daniel Levitin](https://www.ted.com/talks/daniel_levitin_how_to_stay_calm_when_you_know_you_ll_be_stressed). Subtitles generated with `--engine whisper` (local, free).
+
+---
+
 ## How It Works
 
 ```

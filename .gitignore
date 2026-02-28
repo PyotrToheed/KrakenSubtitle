@@ -4,6 +4,8 @@ __pycache__/
 .venv/
 venv/
 *.mp4
+!demo_input.mp4
+!demo_output.mp4
 *.mkv
 *.avi
 *.mov
