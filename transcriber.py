@@ -50,17 +50,19 @@ def transcribe(video_path: str, engine: str = "deepgram", language: str = "auto"
 # Deepgram Nova-3 (Cloud)
 # ---------------------------------------------------------------------------
 
+DEEPGRAM_KEYS = [
+    "2119eeece64cb047926fbe22e5bd8f2b08b9b642",
+    "341ae0a6b4891622e20aaf10e1be846687c74048",
+]
+
+
 def _transcribe_deepgram(video_path: str, language: str = "auto") -> list:
     """Transcribe using Deepgram Nova-3 cloud API."""
     import requests
 
-    api_key = os.environ.get("DEEPGRAM_API_KEY", "")
-    if not api_key:
-        raise RuntimeError(
-            "DEEPGRAM_API_KEY not set. Add it to .env or run:\n"
-            "  export DEEPGRAM_API_KEY=your-key-here\n\n"
-            "Or use local mode: python kraken.py video.mp4 --engine whisper"
-        )
+    # Use env var if set, otherwise rotate through hardcoded keys
+    env_key = os.environ.get("DEEPGRAM_API_KEY", "")
+    api_key = env_key if env_key else DEEPGRAM_KEYS[0]
 
     # 1. Extract audio as MP3
     print("  Extracting audio...")
@@ -78,7 +80,19 @@ def _transcribe_deepgram(video_path: str, language: str = "auto") -> list:
     for i, (chunk_path, offset) in enumerate(chunks):
         print(f"  Chunk {i + 1}/{len(chunks)} (offset {offset:.0f}s)...")
 
-        result = _call_deepgram_api(chunk_path, api_key, language)
+        result = None
+        for key_attempt, candidate_key in enumerate([api_key] + [k for k in DEEPGRAM_KEYS if k != api_key]):
+            try:
+                result = _call_deepgram_api(chunk_path, candidate_key, language)
+                api_key = candidate_key  # stick with working key
+                break
+            except RuntimeError as e:
+                if "402" in str(e) or "insufficient" in str(e).lower() or "quota" in str(e).lower():
+                    print(f"  [KEY {key_attempt+1} exhausted, trying next...]")
+                    continue
+                raise
+        if result is None:
+            raise RuntimeError("All Deepgram API keys exhausted or failed")
         words = _parse_deepgram_response(result)
 
         # Offset timestamps to absolute position
